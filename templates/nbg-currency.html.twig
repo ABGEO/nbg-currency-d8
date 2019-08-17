@@ -4,14 +4,17 @@
  * Template for the NBG Currency block.
  *
  * Available variables:
- * - currency_data: array of currency data.
+ * - currency_data: Array of currency data.
+ * - module_path:   Path to module.
  */
 #}
 
 <table>
   {% for k, v in currency_data %}
     <tr>
-      <td>{{ k }}</td>
+      <td>
+        <img src="/{{ module_path }}/images/flags/{{ k|lower }}.png" alt="{{ k }}">
+      </td>
       <td>{{ v.currency }}</td>
       <td style="color: {{ v.rate == -1 ? 'red' : 'green' }}">
         {{ v.change }}
