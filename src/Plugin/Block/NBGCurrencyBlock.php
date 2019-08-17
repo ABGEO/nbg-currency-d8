@@ -37,7 +37,7 @@ class NBGCurrencyBlock extends BlockBase
         $currency_data[$k] = [
           'currency' => $currency->getCurrency(),
           'rate' => $currency->getRate(),
-          'change' => $currency->getChange(),
+          'change' => round($currency->getChange(), 4),
         ];
       } catch (InvalidCurrencyException $e) {
         \Drupal::logger('nbg_currency')->error($e->getMessage());

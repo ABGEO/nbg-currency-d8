@@ -7,6 +7,15 @@
  * - currency_data: array of currency data.
  */
 #}
-<h1>NBG Currency</h1>
 
-{{ drupal_dump(currency_data) }}
+<table>
+  {% for k, v in currency_data %}
+    <tr>
+      <td>{{ k }}</td>
+      <td>{{ v.currency }}</td>
+      <td style="color: {{ v.rate == -1 ? 'red' : 'green' }}">
+        {{ v.change }}
+      </td>
+    </tr>
+  {% endfor %}
+</table>
