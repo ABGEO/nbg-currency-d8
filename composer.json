@@ -1,0 +1,14 @@
+{
+  "name": "drupal/nbg_currency",
+  "type": "drupal-module",
+  "description": "Module for working with NBG Currency API.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/nbg_currency",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/nbg_currency",
+    "source": "http://cgit.drupalcode.org/nbg_currency"
+  },
+  "require": {}
+}

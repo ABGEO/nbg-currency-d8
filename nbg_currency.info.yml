@@ -1,0 +1,5 @@
+name: 'NBG Currency'
+type: module
+description: 'Module for working with NBG Currency API.'
+core: 8.x
+package: 'nbg_currency'

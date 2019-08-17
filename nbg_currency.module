@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains nbg_currency.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function nbg_currency_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the nbg_currency module.
+    case 'help.page.nbg_currency':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Module for working with NBG Currency API.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function nbg_currency_theme() {
+  return [
+    'nbg_currency' => [
+      'render element' => 'children',
+    ],
+  ];
+}
