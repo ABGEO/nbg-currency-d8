@@ -30,6 +30,9 @@ function nbg_currency_theme() {
   return [
     'nbg_currency' => [
       'render element' => 'children',
+      'variables' => [
+        'currency_data' => NULL,
+      ],
     ],
   ];
 }
