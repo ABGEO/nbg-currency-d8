@@ -10,5 +10,7 @@
     "issues": "https://www.drupal.org/project/issues/nbg_currency",
     "source": "http://cgit.drupalcode.org/nbg_currency"
   },
-  "require": {}
+  "require": {
+    "abgeo/nbg-currency": "1.1"
+  }
 }
