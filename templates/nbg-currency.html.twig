@@ -11,12 +11,19 @@
 
 <table>
   {% for k, v in currency_data %}
+    {% if v.rate == -1 %}
+      {% set change_color = 'red' %}
+    {% elseif v.rate == 1 %}
+      {% set change_color = 'green' %}
+    {% else %}
+      {% set change_color = null %}
+    {% endif %}
     <tr>
       <td>
         <img src="/{{ module_path }}/images/flags/{{ k|lower }}.png" alt="{{ k }}">
       </td>
       <td>{{ v.currency }}</td>
-      <td style="color: {{ v.rate == -1 ? 'red' : 'green' }}">
+      <td style="color: {{ change_color }};">
         {{ v.change }}
       </td>
     </tr>
