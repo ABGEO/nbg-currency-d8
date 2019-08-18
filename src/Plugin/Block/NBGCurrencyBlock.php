@@ -24,24 +24,31 @@ class NBGCurrencyBlock extends BlockBase
    */
   public function build()
   {
+    // Get codes state from config.
     $currency_codes = $this->configuration['nbg_currency_currencies'];
+    // Filter only selected codes.
     $currency_codes = array_filter($currency_codes, function ($value, $key) {
       return $value !== 0;
     }, ARRAY_FILTER_USE_BOTH);
 
+    // Get data for given currency codes.
     $currency_data = array();
     foreach ($currency_codes as $k => $v) {
       try {
+        // Create new Currency class for given code.
         $currency = new Currency($k);
 
+        // Get current currency data from class.
         $currency_data[$k] = [
           'currency' => $currency->getCurrency(),
           'rate' => $currency->getRate(),
           'change' => round($currency->getChange(), 4),
         ];
       } catch (InvalidCurrencyException $e) {
+        // TODO: Use Dependency Injection.
         \Drupal::logger('nbg_currency')->error($e->getMessage());
       } catch (\SoapFault $e) {
+        // TODO: Use Dependency Injection.
         \Drupal::logger('nbg_currency')->error($e->getMessage());
       }
     }
@@ -73,6 +80,7 @@ class NBGCurrencyBlock extends BlockBase
     $response = curl_exec($ch);
     curl_close($ch);
 
+    // Decode from JSON.
     $currency_names = Json::decode($response);
 
     // Get constants from Currency class.
@@ -88,12 +96,13 @@ class NBGCurrencyBlock extends BlockBase
       }
     }
 
+    // Create checkboxes group for Currency Codes.
     $form['nbg_currency_currencies'] = [
       '#type' => 'checkboxes',
       '#options' => $currencies,
       '#title' => $this->t('Currency Codes'),
       '#description' => $this->t('Select Currency Codes for displaying in block.'),
-      '#default_value' => $config['nbg_currency_currencies'] ?? '',
+      '#default_value' => $config['nbg_currency_currencies'] ?? [],
     ];
 
     return $form;

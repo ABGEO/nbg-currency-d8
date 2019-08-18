@@ -32,7 +32,8 @@ function nbg_currency_theme() {
       'render element' => 'children',
       'variables' => [
         'currency_data' => NULL,
-        'module_path' => \Drupal::moduleHandler()->getModule('nbg_currency')->getPath(),
+        'module_path' => \Drupal::moduleHandler()
+          ->getModule('nbg_currency')->getPath(),
       ],
     ],
   ];
