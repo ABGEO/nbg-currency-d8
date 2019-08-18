@@ -13,26 +13,28 @@
   <h1>{{ 'The list of currencies is empty.'|trans }}</h1>
 {% else %}
   <table>
+    <tbody>
     {% for k, v in currency_data %}
       {% if v.rate == -1 %}
-        {% set change_color = 'red' %}
+        {% set change_class = 'nbg-currency-decreased' %}
         {% set change_status = 'Decreased' %}
       {% elseif v.rate == 1 %}
-        {% set change_color = 'green' %}
+        {% set change_class = 'nbg-currency-increased' %}
         {% set change_status = 'Increased' %}
       {% else %}
         {% set change_color = null %}
         {% set change_status = 'Unchanged' %}
       {% endif %}
       <tr>
-        <td title="{{ v.title }}">
+        <td title="{{ v.title }}" class="nbg-currency-td-flag">
           <img src="/{{ module_path }}/images/flags/{{ k|lower }}.png" alt="{{ k }}">
         </td>
         <td title="{{ v.description|trans }}">{{ v.currency }}</td>
-        <td style="color: {{ change_color }};" title="{{ change_status|trans }}">
+        <td class="{{ change_class }}" title="{{ change_status|trans }}">
           {{ v.change }}
         </td>
       </tr>
     {% endfor %}
+    </tbody>
   </table>
 {% endif %}

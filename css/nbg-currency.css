@@ -1,0 +1,11 @@
+.nbg-currency-td-flag {
+    text-align: center;
+}
+
+.nbg-currency-decreased {
+    color: red;
+}
+
+.nbg-currency-increased {
+    color: green;
+}

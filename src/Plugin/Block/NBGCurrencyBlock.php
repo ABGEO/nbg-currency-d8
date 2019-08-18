@@ -117,6 +117,11 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
 
     return [
       '#theme' => 'nbg_currency',
+      '#attached' => [
+        'library' => [
+          'nbg_currency/nbg-currency',
+        ],
+      ],
       '#currency_data' => $currency_data,
     ];
   }

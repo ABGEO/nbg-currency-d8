@@ -1,0 +1,4 @@
+nbg-currency:
+  css:
+    theme:
+      css/nbg-currency.css: {}
