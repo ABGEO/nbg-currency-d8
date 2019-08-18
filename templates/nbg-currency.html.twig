@@ -17,10 +17,10 @@
     {% for k, v in currency_data %}
       {% if v.rate == -1 %}
         {% set change_class = 'nbg-currency-decreased' %}
-        {% set change_status = 'Decreased' %}
+        {% set change_status = 'Decreased by %change%' %}
       {% elseif v.rate == 1 %}
         {% set change_class = 'nbg-currency-increased' %}
-        {% set change_status = 'Increased' %}
+        {% set change_status = 'Increased by %change%' %}
       {% else %}
         {% set change_color = null %}
         {% set change_status = 'Unchanged' %}
@@ -30,7 +30,8 @@
           <img src="/{{ module_path }}/images/flags/{{ k|lower }}.png" alt="{{ k }}">
         </td>
         <td title="{{ v.description|trans }}">{{ v.currency }}</td>
-        <td class="{{ change_class }}" title="{{ change_status|trans }}">
+        <td class="{{ change_class }}"
+            title="{{ change_status|trans({ '%change%': v.change|abs })|striptags }}">
           {{ v.change }}
         </td>
       </tr>
