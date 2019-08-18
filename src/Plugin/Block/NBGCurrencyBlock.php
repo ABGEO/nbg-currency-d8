@@ -20,10 +20,42 @@ use ReflectionClass;
 class NBGCurrencyBlock extends BlockBase
 {
   /**
+   * Currency Code full names from openexchangerates API.
+   *
+   * @var string
+   */
+  private $currencyNames;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition)
+  {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    // Get Currency names from openexchangerates API.
+    $curl_options = array(
+      CURLOPT_HEADER => false,
+      CURLOPT_URL => 'https://openexchangerates.org/api/currencies.json',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_SSL_VERIFYPEER => false
+    );
+    $ch = curl_init();
+    curl_setopt_array($ch, $curl_options);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    // Decode from JSON.
+    $this->currencyNames = Json::decode($response);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function build()
   {
+    $currency_names = $this->currencyNames;
+
     // Get codes state from config.
     $currency_codes = $this->configuration['nbg_currency_currencies'];
     // Filter only selected codes.
@@ -40,6 +72,9 @@ class NBGCurrencyBlock extends BlockBase
 
         // Get current currency data from class.
         $currency_data[$k] = [
+          'title' => isset($currency_names[$k]) ?
+            $currency_names[$k] . ' (' . $k . ')' : $k,
+          'description' => $currency->getDescription(),
           'currency' => $currency->getCurrency(),
           'rate' => $currency->getRate(),
           'change' => round($currency->getChange(), 4),
@@ -67,21 +102,7 @@ class NBGCurrencyBlock extends BlockBase
     $form = parent::blockForm($form, $form_state);
 
     $config = $this->getConfiguration();
-
-    // Get Currency names from openexchangerates API.
-    $curl_options = array(
-      CURLOPT_HEADER => false,
-      CURLOPT_URL => 'https://openexchangerates.org/api/currencies.json',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_SSL_VERIFYPEER => false
-    );
-    $ch = curl_init();
-    curl_setopt_array($ch, $curl_options);
-    $response = curl_exec($ch);
-    curl_close($ch);
-
-    // Decode from JSON.
-    $currency_names = Json::decode($response);
+    $currency_names = $this->currencyNames;
 
     // Get constants from Currency class.
     $o_class = new ReflectionClass(Currency::class);

@@ -9,21 +9,25 @@
  */
 #}
 
+{# TODO: Get message if table is empty. #}
 <table>
   {% for k, v in currency_data %}
     {% if v.rate == -1 %}
       {% set change_color = 'red' %}
+      {% set change_status = 'Decreased' %}
     {% elseif v.rate == 1 %}
       {% set change_color = 'green' %}
+      {% set change_status = 'Increased' %}
     {% else %}
       {% set change_color = null %}
+      {% set change_status = 'Unchanged' %}
     {% endif %}
     <tr>
-      <td>
+      <td title="{{ v.title }}">
         <img src="/{{ module_path }}/images/flags/{{ k|lower }}.png" alt="{{ k }}">
       </td>
-      <td>{{ v.currency }}</td>
-      <td style="color: {{ change_color }};">
+      <td title="{{ v.description|trans }}">{{ v.currency }}</td>
+      <td style="color: {{ change_color }};" title="{{ change_status|trans }}">
         {{ v.change }}
       </td>
     </tr>
