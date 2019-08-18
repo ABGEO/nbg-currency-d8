@@ -7,7 +7,10 @@ use ABGEO\NBG\Exception\InvalidCurrencyException;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a 'NBGCurrency' Block.
@@ -17,8 +20,15 @@ use ReflectionClass;
  *   admin_label = @Translation("NBG Currency"),
  * )
  */
-class NBGCurrencyBlock extends BlockBase
+class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterface
 {
+  /**
+   * The logger factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  private $loggerFactory;
+
   /**
    * Currency Code full names from openexchangerates API.
    *
@@ -29,9 +39,24 @@ class NBGCurrencyBlock extends BlockBase
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition)
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition)
+  {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('logger.factory')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelFactoryInterface $logger_factory)
   {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    $this->loggerFactory = $logger_factory;
 
     // Get Currency names from openexchangerates API.
     $curl_options = array(
@@ -80,11 +105,13 @@ class NBGCurrencyBlock extends BlockBase
           'change' => round($currency->getChange(), 4),
         ];
       } catch (InvalidCurrencyException $e) {
-        // TODO: Use Dependency Injection.
-        \Drupal::logger('nbg_currency')->error($e->getMessage());
+        $this->loggerFactory
+          ->get('nbg_currency')
+          ->error($e->getMessage());
       } catch (\SoapFault $e) {
-        // TODO: Use Dependency Injection.
-        \Drupal::logger('nbg_currency')->error($e->getMessage());
+        $this->loggerFactory
+          ->get('nbg_currency')
+          ->error($e->getMessage());
       }
     }
 
