@@ -107,11 +107,11 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       } catch (InvalidCurrencyException $e) {
         $this->loggerFactory
           ->get('nbg_currency')
-          ->error($e->getMessage());
+          ->error($e);
       } catch (\SoapFault $e) {
         $this->loggerFactory
           ->get('nbg_currency')
-          ->error($e->getMessage());
+          ->error($e);
       }
     }
 
