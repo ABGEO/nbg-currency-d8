@@ -2,8 +2,8 @@ INTRODUCTION
 ------------
 
 
-This Drupal 8 module is for working with NBG (National Bank of Georgia) Currency API 
-and provides a block with a list of selected currencies.
+This Drupal 8 module is for working with NBG (National Bank of Georgia)
+Currency API and provides a block with a list of selected currencies.
 
 REQUIREMENTS
 ------------

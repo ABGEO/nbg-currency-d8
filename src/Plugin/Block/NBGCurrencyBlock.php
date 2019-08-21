@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin_label = @Translation("NBG Currency"),
  * )
  */
-class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterface h{
+class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterface {
   /**
    * The logger factory.
    *
@@ -166,4 +166,5 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     $values = $form_state->getValues();
     $this->configuration['nbg_currency_currencies'] = $values['nbg_currency_currencies'];
   }
+
 }
