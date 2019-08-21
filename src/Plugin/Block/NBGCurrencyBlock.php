@@ -20,8 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin_label = @Translation("NBG Currency"),
  * )
  */
-class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterface
-{
+class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterface h{
   /**
    * The logger factory.
    *
@@ -39,8 +38,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition)
-  {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
       $plugin_id,
@@ -52,19 +50,18 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelFactoryInterface $logger_factory)
-  {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelFactoryInterface $logger_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->loggerFactory = $logger_factory;
 
     // Get Currency names from openexchangerates API.
-    $curl_options = array(
-      CURLOPT_HEADER => false,
+    $curl_options = [
+      CURLOPT_HEADER => FALSE,
       CURLOPT_URL => 'https://openexchangerates.org/api/currencies.json',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_SSL_VERIFYPEER => false
-    );
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_SSL_VERIFYPEER => FALSE,
+    ];
     $ch = curl_init();
     curl_setopt_array($ch, $curl_options);
     $response = curl_exec($ch);
@@ -77,8 +74,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function build()
-  {
+  public function build() {
     $currency_names = $this->currencyNames;
 
     // Get codes state from config.
@@ -89,7 +85,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     }, ARRAY_FILTER_USE_BOTH);
 
     // Get data for given currency codes.
-    $currency_data = array();
+    $currency_data = [];
     foreach ($currency_codes as $k => $v) {
       try {
         // Create new Currency class for given code.
@@ -98,17 +94,19 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
         // Get current currency data from class.
         $currency_data[$k] = [
           'title' => isset($currency_names[$k]) ?
-            $currency_names[$k] . ' (' . $k . ')' : $k,
+          $currency_names[$k] . ' (' . $k . ')' : $k,
           'description' => $currency->getDescription(),
           'currency' => $currency->getCurrency(),
           'rate' => $currency->getRate(),
           'change' => round($currency->getChange(), 4),
         ];
-      } catch (InvalidCurrencyException $e) {
+      }
+      catch (InvalidCurrencyException $e) {
         $this->loggerFactory
           ->get('nbg_currency')
           ->error($e);
-      } catch (\SoapFault $e) {
+      }
+      catch (\SoapFault $e) {
         $this->loggerFactory
           ->get('nbg_currency')
           ->error($e);
@@ -129,8 +127,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function blockForm($form, FormStateInterface $form_state)
-  {
+  public function blockForm($form, FormStateInterface $form_state) {
     $form = parent::blockForm($form, $form_state);
 
     $config = $this->getConfiguration();
@@ -138,11 +135,11 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
 
     // Get constants from Currency class.
     $o_class = new ReflectionClass(Currency::class);
-    $NBG_currency_constants = $o_class->getConstants();
+    $currency_constants = $o_class->getConstants();
 
     // Add Currency Code Checkbox options.
     $currencies = [];
-    foreach ($NBG_currency_constants as $k => $currency) {
+    foreach ($currency_constants as $k => $currency) {
       if (strpos($k, 'CURRENCY_') === 0) {
         $currencies[$currency] = isset($currency_names[$currency]) ?
           $currency_names[$currency] . ' (' . $currency . ')' : $currency;
@@ -164,8 +161,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * {@inheritdoc}
    */
-  public function blockSubmit($form, FormStateInterface $form_state)
-  {
+  public function blockSubmit($form, FormStateInterface $form_state) {
     parent::blockSubmit($form, $form_state);
     $values = $form_state->getValues();
     $this->configuration['nbg_currency_currencies'] = $values['nbg_currency_currencies'];
