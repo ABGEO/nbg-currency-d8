@@ -21,6 +21,12 @@ Install as you would normally install a contributed Drupal module. Visit
 https://www.drupal.org/docs/8/extending-drupal-8/installing-drupal-8-modules
 for further information.
 
+CONFIGURATION
+-------------
+
+* Place block from /admin/structure/block section;
+* In block configuration page select needed currencies;
+
 MAINTAINERS
 -----------
 
