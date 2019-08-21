@@ -9,6 +9,8 @@ use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,7 +35,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
    *
    * @var string
    */
-  private $currencyNames;
+  private $currencyNames = [];
 
   /**
    * {@inheritdoc}
@@ -43,32 +45,37 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('logger.factory')
+      $container->get('logger.factory'),
+      $container->get('http_client')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    LoggerChannelFactoryInterface $logger_factory,
+    Client $client
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->loggerFactory = $logger_factory;
 
-    // Get Currency names from openexchangerates API.
-    $curl_options = [
-      CURLOPT_HEADER => FALSE,
-      CURLOPT_URL => 'https://openexchangerates.org/api/currencies.json',
-      CURLOPT_RETURNTRANSFER => TRUE,
-      CURLOPT_SSL_VERIFYPEER => FALSE,
-    ];
-    $ch = curl_init();
-    curl_setopt_array($ch, $curl_options);
-    $response = curl_exec($ch);
-    curl_close($ch);
+    try {
+      // Get Currency names from openexchangerates API.
+      $response = $client->get('https://openexchangerates.org/api/currencies.json');
 
-    // Decode from JSON.
-    $this->currencyNames = Json::decode($response);
+      // Decode from JSON.
+      $this->currencyNames = Json::decode($response->getBody());
+    }
+    catch (RequestException $e) {
+      $this->loggerFactory
+        ->get('nbg_currency')
+        ->error($e);
+    }
   }
 
   /**
