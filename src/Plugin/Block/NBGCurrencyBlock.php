@@ -6,6 +6,7 @@ use ABGEO\NBG\Currency;
 use ABGEO\NBG\Exception\InvalidCurrencyException;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -31,6 +32,20 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   private $loggerFactory;
 
   /**
+   * Drupal HTTP Client.
+   *
+   * @var Client
+   */
+  private $client;
+
+  /**
+   * Cache backend.
+   *
+   * @var CacheBackendInterface.
+   */
+  private $cacheBackend;
+
+  /**
    * Currency Code full names from openexchangerates API.
    *
    * @var string
@@ -46,7 +61,8 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       $plugin_id,
       $plugin_definition,
       $container->get('logger.factory'),
-      $container->get('http_client')
+      $container->get('http_client'),
+      $container->get('cache.default')
     );
   }
 
@@ -58,24 +74,16 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     $plugin_id,
     $plugin_definition,
     LoggerChannelFactoryInterface $logger_factory,
-    Client $client
+    Client $client,
+    CacheBackendInterface $cache
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->loggerFactory = $logger_factory;
+    $this->client = $client;
+    $this->cacheBackend = $cache;
 
-    try {
-      // Get Currency names from openexchangerates API.
-      $response = $client->get('https://openexchangerates.org/api/currencies.json');
-
-      // Decode from JSON.
-      $this->currencyNames = Json::decode($response->getBody());
-    }
-    catch (RequestException $e) {
-      $this->loggerFactory
-        ->get('nbg_currency')
-        ->error($e);
-    }
+    $this->currencyNames = $this->getCurrencyNames();
   }
 
   /**
@@ -129,6 +137,42 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       ],
       '#currency_data' => $currency_data,
     ];
+  }
+
+  /**
+   * Get Currency Names from cache or openexchangerates API.
+   *
+   * @return array
+   *   Currency names.
+   */
+  private function getCurrencyNames() {
+    $cache = $this->cacheBackend;
+    $cid = 'nbg_currency.currency_names';
+
+    // Get data from cache if exists.
+    if ($cached_names = $cache->get($cid)) {
+      return $cached_names->data;
+    }
+
+    $cached_names = [];
+    try {
+      // Get Currency names from openexchangerates API.
+      $response = $this->client
+        ->get('https://openexchangerates.org/api/currencies.json');
+
+      // Decode from JSON.
+      $cached_names = Json::decode($response->getBody());
+    }
+    catch (RequestException $e) {
+      $this->loggerFactory
+        ->get('nbg_currency')
+        ->error($e);
+    }
+
+    // Save data in cache
+    $cache->set($cid, $cached_names);
+
+    return $cached_names;
   }
 
   /**
