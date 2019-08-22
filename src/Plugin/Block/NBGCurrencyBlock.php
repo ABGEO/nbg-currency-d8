@@ -34,14 +34,14 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * Drupal HTTP Client.
    *
-   * @var Client
+   * @var GuzzleHttp\Client
    */
   private $client;
 
   /**
    * Cache backend.
    *
-   * @var CacheBackendInterface.
+   * @var Drupal\Core\Cache\CacheBackendInterface
    */
   private $cacheBackend;
 
@@ -169,7 +169,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
         ->error($e);
     }
 
-    // Save data in cache
+    // Save data in cache.
     $cache->set($cid, $cached_names);
 
     return $cached_names;
