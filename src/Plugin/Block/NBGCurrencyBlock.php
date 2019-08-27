@@ -152,7 +152,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
    * @return array
    *   Cached currency data.
    */
-  public function getCurrencyData($currency_codes) {
+  public function getCurrencyData(array $currency_codes) {
     $cache = $this->cacheBackend;
     $currency_names = $this->getCurrencyNames();
     $config = $this->getConfiguration();
