@@ -146,7 +146,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * Get currency data from cache or API.
    *
-   * @param $currency_codes
+   * @param array $currency_codes
    *   Currency codes.
    *
    * @return array
@@ -172,7 +172,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
         // Get current currency data from class.
         $currency_data[$k] = [
           'title' => isset($currency_names[$k]) ?
-            $currency_names[$k] . ' (' . $k . ')' : $k,
+          $currency_names[$k] . ' (' . $k . ')' : $k,
           'description' => $currency->getDescription(),
           'currency' => $currency->getCurrency(),
           'rate' => $currency->getRate(),
