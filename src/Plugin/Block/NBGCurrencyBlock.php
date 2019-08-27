@@ -46,13 +46,6 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   private $cacheBackend;
 
   /**
-   * Currency Code full names from openexchangerates API.
-   *
-   * @var string
-   */
-  private $currencyNames = [];
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -82,51 +75,23 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     $this->loggerFactory = $logger_factory;
     $this->client = $client;
     $this->cacheBackend = $cache;
-
-    $this->currencyNames = $this->getCurrencyNames();
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    $currency_names = $this->currencyNames;
+    $config = $this->getConfiguration();
 
     // Get codes state from config.
-    $currency_codes = $this->configuration['nbg_currency_currencies'];
+    $currency_codes = $config['nbg_currency_currencies'];
     // Filter only selected codes.
     $currency_codes = array_filter($currency_codes, function ($value, $key) {
       return $value !== 0;
     }, ARRAY_FILTER_USE_BOTH);
 
     // Get data for given currency codes.
-    $currency_data = [];
-    foreach ($currency_codes as $k => $v) {
-      try {
-        // Create new Currency class for given code.
-        $currency = new Currency($k);
-
-        // Get current currency data from class.
-        $currency_data[$k] = [
-          'title' => isset($currency_names[$k]) ?
-          $currency_names[$k] . ' (' . $k . ')' : $k,
-          'description' => $currency->getDescription(),
-          'currency' => $currency->getCurrency(),
-          'rate' => $currency->getRate(),
-          'change' => round($currency->getChange(), 4),
-        ];
-      }
-      catch (InvalidCurrencyException $e) {
-        $this->loggerFactory
-          ->get('nbg_currency')
-          ->error($e);
-      }
-      catch (\SoapFault $e) {
-        $this->loggerFactory
-          ->get('nbg_currency')
-          ->error($e);
-      }
-    }
+    $currency_data = $this->getCurrencyData($currency_codes);
 
     return [
       '#theme' => 'nbg_currency',
@@ -136,6 +101,9 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
         ],
       ],
       '#currency_data' => $currency_data,
+      '#cache' => [
+        'max-age' => $config['nbg_currency_cache'],
+      ],
     ];
   }
 
@@ -176,13 +144,71 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   }
 
   /**
+   * Get currency data from cache or API.
+   *
+   * @param $currency_codes
+   *   Currency codes.
+   *
+   * @return array
+   *   Cached currency data.
+   */
+  public function getCurrencyData($currency_codes) {
+    $cache = $this->cacheBackend;
+    $currency_names = $this->getCurrencyNames();
+    $config = $this->getConfiguration();
+    $cid = 'nbg_currency.currency_data';
+
+    // Get data from cache if exists.
+    if ($currency_data = $cache->get($cid)) {
+      return $currency_data->data;
+    }
+
+    $currency_data = [];
+    foreach ($currency_codes as $k => $v) {
+      try {
+        // Create new Currency class for given code.
+        $currency = new Currency($k);
+
+        // Get current currency data from class.
+        $currency_data[$k] = [
+          'title' => isset($currency_names[$k]) ?
+            $currency_names[$k] . ' (' . $k . ')' : $k,
+          'description' => $currency->getDescription(),
+          'currency' => $currency->getCurrency(),
+          'rate' => $currency->getRate(),
+          'change' => round($currency->getChange(), 4),
+        ];
+      }
+      catch (InvalidCurrencyException $e) {
+        $this->loggerFactory
+          ->get('nbg_currency')
+          ->error($e);
+      }
+      catch (\SoapFault $e) {
+        $this->loggerFactory
+          ->get('nbg_currency')
+          ->error($e);
+      }
+    }
+
+    // Cache data.
+    $cache->set(
+      $cid,
+      $currency_data,
+      time() + $config['nbg_currency_cache']
+    );
+
+    return $currency_data;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {
     $form = parent::blockForm($form, $form_state);
 
     $config = $this->getConfiguration();
-    $currency_names = $this->currencyNames;
+    $currency_names = $this->getCurrencyNames();
 
     // Get constants from Currency class.
     $o_class = new ReflectionClass(Currency::class);
@@ -196,6 +222,20 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
           $currency_names[$currency] . ' (' . $currency . ')' : $currency;
       }
     }
+
+    // Cache selector.
+    $form['nbg_currency_cache'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Cache'),
+      '#options' => [
+        0 => $this->t('No Cache'),
+        1800 => $this->t('30 min'),
+        3600 => $this->t('1 hour'),
+        86400 => $this->t('One day'),
+      ],
+      '#default_value' => $config['nbg_currency_cache'] ?? NULL,
+      '#description' => $this->t('Time for cache the currency.'),
+    ];
 
     // Container for filtering currencies.
     $form['nbg_currency'] = [
@@ -241,7 +281,13 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   public function blockSubmit($form, FormStateInterface $form_state) {
     parent::blockSubmit($form, $form_state);
     $values = $form_state->getValues();
+    $cache = $this->cacheBackend;
+
     $this->configuration['nbg_currency_currencies'] = $values['nbg_currency_currencies'];
+    $this->configuration['nbg_currency_cache'] = $values['nbg_currency_cache'];
+
+    // Delete cached currency data.
+    $cache->delete('nbg_currency.currency_data');
   }
 
 }
