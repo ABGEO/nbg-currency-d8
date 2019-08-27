@@ -225,8 +225,8 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       '#description' => $this->t('Select Currency Codes for displaying in block.'),
       '#default_value' => $config['nbg_currency_currencies'] ?? [],
       '#attributes' => [
-        'class' => ['nbg-currency']
-      ]
+        'class' => ['nbg-currency'],
+      ],
     ];
 
     // Attach block settings library.

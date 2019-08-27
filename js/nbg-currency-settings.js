@@ -10,12 +10,12 @@
       // Currency filter.
       $('input.currency-filter-search', context).once().on('input', function (e) {
         var value = $(this).val().toLowerCase();
-        $(".nbg-currency")
-          .closest('.form-type-checkbox')
-          .filter(function () {
-          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-        });
-      })
+        $('.nbg-currency')
+            .closest('.form-type-checkbox')
+            .filter(function () {
+              $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+      });
     }
   };
 })(jQuery, Drupal);
