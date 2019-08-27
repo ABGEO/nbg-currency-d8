@@ -2,3 +2,10 @@ nbg-currency:
   css:
     theme:
       css/nbg-currency.css: {}
+
+nbg-currency.settings:
+  js:
+    js/nbg-currency-settings.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once

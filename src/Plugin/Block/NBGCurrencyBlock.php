@@ -197,6 +197,26 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       }
     }
 
+    // Container for filtering currencies.
+    $form['nbg_currency'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['currency-filter'],
+      ],
+    ];
+
+    // Currency filter.
+    $form['nbg_currency']['nbg_currency_filter'] = [
+      '#type' => 'search',
+      '#title' => $this->t('Filter currency'),
+      '#size' => 30,
+      '#placeholder' => $this->t('Filter by name'),
+      '#description' => $this->t('Enter part of a currency'),
+      '#attributes' => [
+        'class' => ['currency-filter-search'],
+      ],
+    ];
+
     // Create checkboxes group for Currency Codes.
     $form['nbg_currency_currencies'] = [
       '#type' => 'checkboxes',
@@ -204,7 +224,13 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
       '#title' => $this->t('Currency Codes'),
       '#description' => $this->t('Select Currency Codes for displaying in block.'),
       '#default_value' => $config['nbg_currency_currencies'] ?? [],
+      '#attributes' => [
+        'class' => ['nbg-currency']
+      ]
     ];
+
+    // Attach block settings library.
+    $form['#attached']['library'][] = 'nbg_currency/nbg-currency.settings';
 
     return $form;
   }
