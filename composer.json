@@ -11,7 +11,7 @@
     "source": "http://cgit.drupalcode.org/nbg_currency"
   },
   "require": {
-    "abgeo/nbg-currency": "1.1",
+    "abgeo/nbg-currency": "2.0.0",
     "ext-soap": "*"
   }
 }
