@@ -1,7 +1,7 @@
 name: 'NBG Currency'
 type: module
 description: 'Module for working with NBG Currency API.'
-core: 8.x
-package: 'nbg_currency'
+core_version_requirement: ^8 || ^9
+package: Currency
 dependencies:
   - drupal:block
