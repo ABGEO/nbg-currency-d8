@@ -117,7 +117,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
    */
   private function getCurrencyNames() {
     $cache = $this->cacheBackend;
-    $cid = 'nbg_currency.currency_names';
+    $cid = 'nbg_currency:currency_names';
 
     // Get data from cache if exists.
     if ($cached_names = $cache->get($cid)) {
@@ -158,7 +158,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     $cache = $this->cacheBackend;
     $currency_names = $this->getCurrencyNames();
     $config = $this->getConfiguration();
-    $cid = 'nbg_currency.currency_data';
+    $cid = 'nbg_currency:currency_data:' . md5(serialize($currency_codes));
 
     // Get data from cache if exists.
     if ($currency_data = $cache->get($cid)) {
