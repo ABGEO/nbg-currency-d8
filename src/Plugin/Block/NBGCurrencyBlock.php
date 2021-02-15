@@ -4,6 +4,7 @@ namespace Drupal\nbg_currency\Plugin\Block;
 
 use ABGEO\NBG\Currency;
 use ABGEO\NBG\Exception\InvalidCurrencyException;
+use ABGEO\NBG\Helper\CurrencyCodes;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -13,6 +14,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use ReflectionClass;
+use SoapFault;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -34,14 +36,14 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
   /**
    * Drupal HTTP Client.
    *
-   * @var GuzzleHttp\Client
+   * @var \GuzzleHttp\ClientInterface
    */
   private $client;
 
   /**
    * Cache backend.
    *
-   * @var Drupal\Core\Cache\CacheBackendInterface
+   * @var \Drupal\Core\Cache\CacheBackendInterface
    */
   private $cacheBackend;
 
@@ -184,7 +186,7 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
           ->get('nbg_currency')
           ->error($e);
       }
-      catch (\SoapFault $e) {
+      catch (SoapFault $e) {
         $this->loggerFactory
           ->get('nbg_currency')
           ->error($e);
@@ -211,16 +213,14 @@ class NBGCurrencyBlock extends BlockBase implements ContainerFactoryPluginInterf
     $currency_names = $this->getCurrencyNames();
 
     // Get constants from Currency class.
-    $o_class = new ReflectionClass(Currency::class);
+    $o_class = new ReflectionClass(CurrencyCodes::class);
     $currency_constants = $o_class->getConstants();
 
     // Add Currency Code Checkbox options.
     $currencies = [];
     foreach ($currency_constants as $k => $currency) {
-      if (strpos($k, 'CURRENCY_') === 0) {
-        $currencies[$currency] = isset($currency_names[$currency]) ?
-          $currency_names[$currency] . ' (' . $currency . ')' : $currency;
-      }
+      $currencies[$currency] = isset($currency_names[$currency]) ?
+        $currency_names[$currency] . ' (' . $currency . ')' : $currency;
     }
 
     // Cache selector.
