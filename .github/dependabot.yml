@@ -1,0 +1,12 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "01:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: abgeo/nbg-currency
+    versions:
+    - 2.0.0
